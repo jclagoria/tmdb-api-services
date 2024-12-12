@@ -5,11 +5,14 @@ import com.tmdb.api.config.TMDBClientFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 public class TMDBRepository {
 
-    private final TMDBClient tmdbClient;
+    @Inject
+    @RestClient
+    TMDBClient tmdbClient;
 
     @Inject
     public TMDBRepository(
