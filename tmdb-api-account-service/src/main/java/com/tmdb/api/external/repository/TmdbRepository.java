@@ -3,6 +3,7 @@ package com.tmdb.api.external.repository;
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.DetailUser;
+import com.tmdb.api.external.model.FavoriteResponse;
 import com.tmdb.api.external.model.TmdbApiResponse;
 import com.tmdb.api.external.util.ApiRequestBuilder;
 import com.tmdb.api.external.util.ApiRequestBuilderFactory;
@@ -54,6 +55,30 @@ public class TmdbRepository {
             throw new RuntimeException("Failed to fetch account details: HTTP "+response.getStatus());
         }
 
+    }
+
+    public FavoriteResponse favoriteMovies(long accountId, String sessionId, String language, long page, String sortBy) {
+        WebTarget target = basedTarget.path("/account/" + accountId + "/favorite/movies");
+
+        if (sessionId != null && !sessionId.isEmpty()) {
+            target = target.queryParam("sessionId", sessionId);
+        }
+
+        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
+        target = target.queryParam("page", page > 0 ? page : 1 );
+        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
+
+        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
+                .addHeader("accept", MediaType.APPLICATION_JSON)
+                .addHeader("Authorization", "Bearer " + API_TOKEN);
+
+        Response response = builder.build().get();
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(FavoriteResponse.class);
+        } else {
+            throw new RuntimeException("Failed to fetch movies: HTTP " + response.getStatus());
+        }
     }
 
     @Loggable
@@ -127,6 +152,8 @@ public class TmdbRepository {
             throw new RuntimeException("Error adding watch list: " + ex.getMessage(), ex);
         }
     }
+
+
 
     public DetailUser getAccountDetailsFallback(int accountId) {
         return new DetailUser(); // Return a safe default object
