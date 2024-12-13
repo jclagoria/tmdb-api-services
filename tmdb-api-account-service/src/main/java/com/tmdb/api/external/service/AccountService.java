@@ -3,7 +3,7 @@ package com.tmdb.api.external.service;
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.DetailUser;
-import com.tmdb.api.external.model.FavoriteResponse;
+import com.tmdb.api.external.model.FavoriteMovieResponse;
 import com.tmdb.api.external.model.TmdbApiResponse;
 import com.tmdb.api.external.repository.TmdbRepository;
 import com.tmdb.api.util.Loggable;
@@ -38,8 +38,8 @@ public class AccountService {
         return tmdbRepository.addToWatchList(accountId, sessionId, request);
     }
 
-    public FavoriteResponse getFavoriteMovies(long accountId, String sessionId, String language,
-                                              long page, String sortBy ) {
+    public FavoriteMovieResponse getFavoriteMovies(long accountId, String sessionId, String language,
+                                                   long page, String sortBy ) {
         return tmdbRepository.favoriteMovies(accountId, sessionId, language, page, sortBy);
     }
 

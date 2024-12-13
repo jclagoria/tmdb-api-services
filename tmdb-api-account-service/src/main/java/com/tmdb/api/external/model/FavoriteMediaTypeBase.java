@@ -3,30 +3,26 @@ package com.tmdb.api.external.model;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class FavoriteItem {
+public class FavoriteMediaTypeBase {
 
-    private boolean adult;
-    private String backdrop_path;
-    private ArrayList<Integer> genre_ids;
-    private int id;
+    public boolean adult;
+    public String backdrop_path;
+    public ArrayList<Integer> genre_ids;
+    public int id;
     private String original_language;
     private String original_title;
     private String overview;
-    private double popularity;
-    private String poster_path;
-    private String release_date;
-    private String title;
-    private boolean video;
+    public double popularity;
+    public String poster_path;
     private double vote_average;
     private int vote_count;
 
-    public FavoriteItem() {
+    public FavoriteMediaTypeBase() {
     }
 
-    public FavoriteItem(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
-                        int id, String original_language, String original_title, String overview,
-                        double popularity, String poster_path, String release_date, String title,
-                        boolean video, double vote_average, int vote_count) {
+    public FavoriteMediaTypeBase(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
+                                 int id, String original_language, String original_title, String overview,
+                                 double popularity, String poster_path, double vote_average, int vote_count) {
         this.adult = adult;
         this.backdrop_path = backdrop_path;
         this.genre_ids = genre_ids;
@@ -36,9 +32,6 @@ public class FavoriteItem {
         this.overview = overview;
         this.popularity = popularity;
         this.poster_path = poster_path;
-        this.release_date = release_date;
-        this.title = title;
-        this.video = video;
         this.vote_average = vote_average;
         this.vote_count = vote_count;
     }
@@ -115,30 +108,6 @@ public class FavoriteItem {
         this.poster_path = poster_path;
     }
 
-    public String getRelease_date() {
-        return release_date;
-    }
-
-    public void setRelease_date(String release_date) {
-        this.release_date = release_date;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public boolean isVideo() {
-        return video;
-    }
-
-    public void setVideo(boolean video) {
-        this.video = video;
-    }
-
     public double getVote_average() {
         return vote_average;
     }
@@ -158,19 +127,18 @@ public class FavoriteItem {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FavoriteItem that)) return false;
+        if (!(o instanceof FavoriteMediaTypeBase that)) return false;
         return adult == that.adult && id == that.id && Double.compare(popularity, that.popularity) == 0
-                && video == that.video && Double.compare(vote_average, that.vote_average) == 0
-                && vote_count == that.vote_count && Objects.equals(backdrop_path, that.backdrop_path)
-                && Objects.equals(genre_ids, that.genre_ids) && Objects.equals(original_language, that.original_language)
+                && Double.compare(vote_average, that.vote_average) == 0 && vote_count == that.vote_count
+                && Objects.equals(backdrop_path, that.backdrop_path) && Objects.equals(genre_ids, that.genre_ids)
+                && Objects.equals(original_language, that.original_language)
                 && Objects.equals(original_title, that.original_title) && Objects.equals(overview, that.overview)
-                && Objects.equals(poster_path, that.poster_path) && Objects.equals(release_date, that.release_date)
-                && Objects.equals(title, that.title);
+                && Objects.equals(poster_path, that.poster_path);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(adult, backdrop_path, genre_ids, id, original_language, original_title,
-                overview, popularity, poster_path, release_date, title, video, vote_average, vote_count);
+                overview, popularity, poster_path, vote_average, vote_count);
     }
 }

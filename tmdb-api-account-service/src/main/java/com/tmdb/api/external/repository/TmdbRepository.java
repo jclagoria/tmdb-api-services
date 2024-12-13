@@ -3,7 +3,7 @@ package com.tmdb.api.external.repository;
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.DetailUser;
-import com.tmdb.api.external.model.FavoriteResponse;
+import com.tmdb.api.external.model.FavoriteMovieResponse;
 import com.tmdb.api.external.model.TmdbApiResponse;
 import com.tmdb.api.external.util.ApiRequestBuilder;
 import com.tmdb.api.external.util.ApiRequestBuilderFactory;
@@ -57,7 +57,15 @@ public class TmdbRepository {
 
     }
 
-    public FavoriteResponse favoriteMovies(long accountId, String sessionId, String language, long page, String sortBy) {
+    @Retry(maxRetries = 3, delay = 500)
+    @CircuitBreaker(
+            requestVolumeThreshold = 5,
+            failureRatio = 0.5,
+            delay = 1000,
+            successThreshold = 2
+    )
+    public FavoriteMovieResponse favoriteMovies(long accountId, String sessionId,
+                                                String language, long page, String sortBy) {
         WebTarget target = basedTarget.path("/account/" + accountId + "/favorite/movies");
 
         if (sessionId != null && !sessionId.isEmpty()) {
@@ -75,11 +83,13 @@ public class TmdbRepository {
         Response response = builder.build().get();
 
         if (response.getStatus() == 200) {
-            return response.readEntity(FavoriteResponse.class);
+            return response.readEntity(FavoriteMovieResponse.class);
         } else {
             throw new RuntimeException("Failed to fetch movies: HTTP " + response.getStatus());
         }
     }
+
+
 
     @Loggable
     @Retry(maxRetries = 3, delay = 500)
