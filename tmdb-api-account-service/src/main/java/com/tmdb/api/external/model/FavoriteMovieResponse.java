@@ -3,7 +3,7 @@ package com.tmdb.api.external.model;
 import java.util.List;
 import java.util.Objects;
 
-public class FavoriteMovieResponse extends FavoriteResponse {
+public class FavoriteMovieResponse extends BaseTmdbResponse {
 
     private List<FavoriteMovieItem> results;
 

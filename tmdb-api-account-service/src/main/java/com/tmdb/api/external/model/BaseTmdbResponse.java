@@ -2,16 +2,16 @@ package com.tmdb.api.external.model;
 
 import java.util.Objects;
 
-public class FavoriteResponse {
+public class BaseTmdbResponse {
 
     public long page;
     public long total_pages;
     public long total_results;
 
-    public FavoriteResponse() {
+    public BaseTmdbResponse() {
     }
 
-    public FavoriteResponse(long page, long total_pages, long total_results) {
+    public BaseTmdbResponse(long page, long total_pages, long total_results) {
         this.page = page;
         this.total_pages = total_pages;
         this.total_results = total_results;
@@ -44,7 +44,7 @@ public class FavoriteResponse {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FavoriteResponse that)) return false;
+        if (!(o instanceof BaseTmdbResponse that)) return false;
         return page == that.page && total_pages == that.total_pages
                 && total_results == that.total_results;
     }
