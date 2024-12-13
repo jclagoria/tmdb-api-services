@@ -1,12 +1,15 @@
 package com.tmdb.api.external.repository;
 
+import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.model.DetailUser;
+import com.tmdb.api.external.model.TmdbApiResponse;
 import com.tmdb.api.external.util.ApiRequestBuilder;
 import com.tmdb.api.external.util.HttpClientFactory;
 import com.tmdb.api.util.Loggable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -55,6 +58,41 @@ public class TmdbRepository {
             throw new RuntimeException("Failed to fetch account details: HTTP "+response.getStatus());
         }
 
+    }
+
+    public TmdbApiResponse addFavorite(int accountId, String sessionId, AddFavoriteRequest request) {
+        Client client =  null;
+
+        try {
+            client = httpClientFactory.createClient();
+            String url = BASE_URL + "/account/" + accountId + "/favorite";
+
+            WebTarget target = client.target(url);
+
+            if (sessionId != null && !sessionId.isEmpty()) {
+                target = target.queryParam("session_id", sessionId); // Ensure this matches TMDB's API spec
+            }
+
+            ApiRequestBuilder builder = new ApiRequestBuilder(target)
+                    .addHeader("accept", MediaType.APPLICATION_JSON)
+                    .addHeader("content-type", MediaType.APPLICATION_JSON)
+                    .addHeader("Authorization", "Bearer " + API_TOKEN); // API_TOKEN should come from a secure config
+
+            Response response = builder.build().post(Entity.entity(request, MediaType.APPLICATION_JSON));
+
+            if (response.getStatus() == 201 || response.getStatus() == 200) {
+                return response.readEntity(TmdbApiResponse.class);
+            } else {
+                String errorResponse = response.readEntity(String.class); // Read error response for debugging
+                throw new RuntimeException("Failed to add favorite: HTTP " + response.getStatus() + ". Response: " + errorResponse);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error adding favorite: " + e.getMessage(), e);
+        } finally {
+            if (client != null) {
+                client.close(); // Ensure client is properly closed
+            }
+        }
     }
 
     private void logRequestDetails(String url, String token) {
