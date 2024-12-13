@@ -1,6 +1,7 @@
 package com.tmdb.api.external.service;
 
 import com.tmdb.api.external.dto.AddFavoriteRequest;
+import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.DetailUser;
 import com.tmdb.api.external.model.TmdbApiResponse;
 import com.tmdb.api.external.repository.TmdbRepository;
@@ -28,6 +29,12 @@ public class AccountService {
                                                 String sessionId,
                                                 AddFavoriteRequest request) {
         return tmdbRepository.addFavorite(accountId, sessionId, request);
+    }
+
+    public TmdbApiResponse addToWatchList(int accountId,
+                                          String sessionId,
+                                          AddToWatchListRequest request) {
+        return tmdbRepository.addToWatchList(accountId, sessionId, request);
     }
 
 }
