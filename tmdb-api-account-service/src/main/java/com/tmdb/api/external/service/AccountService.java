@@ -1,6 +1,6 @@
 package com.tmdb.api.external.service;
 
-import com.tmdb.api.external.model.AccountResponse;
+import com.tmdb.api.external.model.DetailUser;
 import com.tmdb.api.external.repository.TmdbRepository;
 import com.tmdb.api.util.Loggable;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,7 +13,7 @@ public class AccountService {
     TmdbRepository tmdbRepository;
 
     @Loggable
-    public AccountResponse getAccount(int accountId) {
+    public DetailUser getAccount(int accountId) {
         try {
             return tmdbRepository.getAccountDetails(accountId);
         } catch (RuntimeException ex) {

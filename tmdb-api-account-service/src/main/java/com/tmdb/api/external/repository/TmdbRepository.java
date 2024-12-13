@@ -1,12 +1,11 @@
 package com.tmdb.api.external.repository;
 
+import com.tmdb.api.external.model.DetailUser;
 import com.tmdb.api.external.util.ApiRequestBuilder;
 import com.tmdb.api.external.util.HttpClientFactory;
 import com.tmdb.api.util.Loggable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import com.tmdb.api.external.model.AccountResponse;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
@@ -39,7 +38,7 @@ public class TmdbRepository {
             delay = 1000,
             successThreshold = 2
     )
-    public AccountResponse getAccountDetails(int accountId) {
+    public DetailUser getAccountDetails(int accountId) {
         Client client = httpClientFactory.createClient();
         WebTarget target = client.target(BASE_URL + "/account/" + accountId);
         logRequestDetails(target.getUri().toString(), API_TOKEN);
@@ -51,15 +50,12 @@ public class TmdbRepository {
         logResponseDetails(response);
 
         if (response.getStatus() == 200) {
-            return response.readEntity(AccountResponse.class);
+            return response.readEntity(DetailUser.class);
         } else {
             throw new RuntimeException("Failed to fetch account details: HTTP "+response.getStatus());
         }
 
     }
-
-    
-
 
     private void logRequestDetails(String url, String token) {
         LOGGER.info(() -> "Request URL: " + url);
@@ -68,7 +64,7 @@ public class TmdbRepository {
 
     private void logResponseDetails(Response response) {
         LOGGER.info(() -> "Response Status: " + response.getStatus());
-        LOGGER.info(() -> "Response Body: " + response.readEntity(AccountResponse.class));
+        LOGGER.info(() -> "Response Body: " + response.readEntity(DetailUser.class));
     }
 
     private String maskToken(String token) {
