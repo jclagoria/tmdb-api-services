@@ -2,10 +2,7 @@ package com.tmdb.api.external.resources;
 
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
-import com.tmdb.api.external.model.DetailUser;
-import com.tmdb.api.external.model.FavoriteMovieResponse;
-import com.tmdb.api.external.model.FavoriteResponse;
-import com.tmdb.api.external.model.TmdbApiResponse;
+import com.tmdb.api.external.model.*;
 import com.tmdb.api.external.service.AccountService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -49,6 +46,16 @@ public class AccountResource {
                                                 @QueryParam("page") long page,
                                                 @QueryParam("sortBy") String sortBy) {
         return accountService.getFavoriteMovies(accountId, sessionId, language, page, sortBy);
+    }
+
+    @GET
+    @Path("/{accountId}/favorite/tv")
+    public FavoriteTvResponse favoriteTv(@PathParam("accountId") long accountId,
+                                         @QueryParam("sessionId") String sessionId,
+                                         @QueryParam("language") String language,
+                                         @QueryParam("page") long page,
+                                         @QueryParam("sortBy") String sortBy) {
+        return accountService.getFavoriteTv(accountId, sessionId, language, page, sortBy);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.tmdb.api.external.model;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class FavoriteResponse {

@@ -5,30 +5,28 @@ import java.util.Objects;
 
 public class FavoriteMediaTypeBase {
 
-    public boolean adult;
-    public String backdrop_path;
-    public ArrayList<Integer> genre_ids;
-    public int id;
+    private boolean adult;
+    private String backdrop_path;
+    private ArrayList<Integer> genre_ids;
+    private int id;
     private String original_language;
-    private String original_title;
     private String overview;
-    public double popularity;
-    public String poster_path;
+    private double popularity;
+    private String poster_path;
     private double vote_average;
     private int vote_count;
 
     public FavoriteMediaTypeBase() {
     }
 
-    public FavoriteMediaTypeBase(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
-                                 int id, String original_language, String original_title, String overview,
-                                 double popularity, String poster_path, double vote_average, int vote_count) {
+    public FavoriteMediaTypeBase(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids, int id,
+                                 String original_language, String overview, double popularity,
+                                 String poster_path, double vote_average, int vote_count) {
         this.adult = adult;
         this.backdrop_path = backdrop_path;
         this.genre_ids = genre_ids;
         this.id = id;
         this.original_language = original_language;
-        this.original_title = original_title;
         this.overview = overview;
         this.popularity = popularity;
         this.poster_path = poster_path;
@@ -74,14 +72,6 @@ public class FavoriteMediaTypeBase {
 
     public void setOriginal_language(String original_language) {
         this.original_language = original_language;
-    }
-
-    public String getOriginal_title() {
-        return original_title;
-    }
-
-    public void setOriginal_title(String original_title) {
-        this.original_title = original_title;
     }
 
     public String getOverview() {
@@ -132,13 +122,12 @@ public class FavoriteMediaTypeBase {
                 && Double.compare(vote_average, that.vote_average) == 0 && vote_count == that.vote_count
                 && Objects.equals(backdrop_path, that.backdrop_path) && Objects.equals(genre_ids, that.genre_ids)
                 && Objects.equals(original_language, that.original_language)
-                && Objects.equals(original_title, that.original_title) && Objects.equals(overview, that.overview)
-                && Objects.equals(poster_path, that.poster_path);
+                && Objects.equals(overview, that.overview) && Objects.equals(poster_path, that.poster_path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(adult, backdrop_path, genre_ids, id, original_language, original_title,
+        return Objects.hash(adult, backdrop_path, genre_ids, id, original_language,
                 overview, popularity, poster_path, vote_average, vote_count);
     }
 }

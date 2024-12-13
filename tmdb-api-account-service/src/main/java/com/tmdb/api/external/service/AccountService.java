@@ -4,6 +4,7 @@ import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.DetailUser;
 import com.tmdb.api.external.model.FavoriteMovieResponse;
+import com.tmdb.api.external.model.FavoriteTvResponse;
 import com.tmdb.api.external.model.TmdbApiResponse;
 import com.tmdb.api.external.repository.TmdbRepository;
 import com.tmdb.api.util.Loggable;
@@ -41,6 +42,11 @@ public class AccountService {
     public FavoriteMovieResponse getFavoriteMovies(long accountId, String sessionId, String language,
                                                    long page, String sortBy ) {
         return tmdbRepository.favoriteMovies(accountId, sessionId, language, page, sortBy);
+    }
+
+    public FavoriteTvResponse getFavoriteTv(long accountId, String sessionId, String language,
+                                            long page, String sortBy) {
+        return tmdbRepository.favoriteTv(accountId, sessionId, language, page, sortBy);
     }
 
 }
