@@ -58,4 +58,12 @@ public class AccountResource {
         return accountService.getFavoriteTv(accountId, sessionId, language, page, sortBy);
     }
 
+    @GET
+    @Path("/{accountId}/lists")
+    public TmdbListResponse listTmdb(@PathParam("accountId") long accountId,
+                                     @QueryParam("page") long page,
+                                     @QueryParam("sessionId") String sessionId) {
+        return accountService.getListTmdb(accountId, page, sessionId);
+    }
+
 }

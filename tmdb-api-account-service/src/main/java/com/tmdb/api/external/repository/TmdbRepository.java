@@ -2,10 +2,7 @@ package com.tmdb.api.external.repository;
 
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
-import com.tmdb.api.external.model.DetailUser;
-import com.tmdb.api.external.model.FavoriteMovieResponse;
-import com.tmdb.api.external.model.FavoriteTvResponse;
-import com.tmdb.api.external.model.TmdbApiResponse;
+import com.tmdb.api.external.model.*;
 import com.tmdb.api.external.util.ApiRequestBuilder;
 import com.tmdb.api.external.util.ApiRequestBuilderFactory;
 import com.tmdb.api.util.Loggable;
@@ -121,6 +118,35 @@ public class TmdbRepository {
             throw new RuntimeException("Failed to fetch tv: HTTP " + response.getStatus());
         }
 
+    }
+
+    @Retry(maxRetries = 3, delay = 500)
+    @CircuitBreaker(
+            requestVolumeThreshold = 5,
+            failureRatio = 0.5,
+            delay = 1000,
+            successThreshold = 2
+    )
+    public TmdbListResponse getListTmdb(long accountId, long page, String sessionId) {
+        WebTarget target = basedTarget.path("/account/" + accountId + "/lists");
+
+        if (sessionId != null && !sessionId.isEmpty()) {
+            target = target.queryParam("sessionId", sessionId);
+        }
+
+        target = target.queryParam("page", page > 0  ? page : 1 );
+
+        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
+                .addHeader("accept", MediaType.APPLICATION_JSON)
+                .addHeader("Authorization", "Bearer " + API_TOKEN);
+
+        Response response = builder.build().get();
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(TmdbListResponse.class);
+        } else {
+            throw new RuntimeException("Failed to fetch tmdb: HTTP " + response.getStatus());
+        }
     }
 
     @Loggable
