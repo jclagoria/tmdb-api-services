@@ -36,13 +36,13 @@ public class AccountService {
         return tmdbRepository.addToWatchList(accountId, sessionId, request);
     }
 
-    public FavoriteMovieResponse getFavoriteMovies(long accountId, String sessionId, String language,
-                                                   long page, String sortBy ) {
+    public MovieTmdbResponse getFavoriteMovies(long accountId, String sessionId, String language,
+                                               long page, String sortBy ) {
         return tmdbRepository.favoriteMovies(accountId, sessionId, language, page, sortBy);
     }
 
-    public FavoriteTvResponse getFavoriteTv(long accountId, String sessionId, String language,
-                                            long page, String sortBy) {
+    public TvTmdbResponse getFavoriteTv(long accountId, String sessionId, String language,
+                                        long page, String sortBy) {
         return tmdbRepository.favoriteTv(accountId, sessionId, language, page, sortBy);
     }
 

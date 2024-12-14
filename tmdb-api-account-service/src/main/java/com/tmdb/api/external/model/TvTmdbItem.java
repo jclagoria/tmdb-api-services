@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class FavoriteTvItem extends FavoriteMediaTypeBase {
+public class TvTmdbItem extends TmdbMediaTypeBase {
 
     private String first_air_date;
     private String name;
     private String original_name;
     private List<String> origin_country;
 
-    public FavoriteTvItem() {
+    public TvTmdbItem() {
     }
 
-    public FavoriteTvItem(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
-                          int id, String original_language, String overview, double popularity,
-                          String poster_path, double vote_average, int vote_count, String first_air_date,
-                          String name, String original_name, List<String> origin_country) {
+    public TvTmdbItem(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
+                      int id, String original_language, String overview, double popularity,
+                      String poster_path, double vote_average, int vote_count, String first_air_date,
+                      String name, String original_name, List<String> origin_country) {
         super(adult, backdrop_path, genre_ids, id, original_language,
                 overview, popularity, poster_path, vote_average, vote_count);
         this.first_air_date = first_air_date;
@@ -61,7 +61,7 @@ public class FavoriteTvItem extends FavoriteMediaTypeBase {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FavoriteTvItem that)) return false;
+        if (!(o instanceof TvTmdbItem that)) return false;
         if (!super.equals(o)) return false;
         return Objects.equals(first_air_date, that.first_air_date)
                 && Objects.equals(name, that.name) && Objects.equals(original_name, that.original_name)

@@ -62,8 +62,8 @@ public class TmdbRepository {
             delay = 1000,
             successThreshold = 2
     )
-    public FavoriteMovieResponse favoriteMovies(long accountId, String sessionId,
-                                                String language, long page, String sortBy) {
+    public MovieTmdbResponse favoriteMovies(long accountId, String sessionId,
+                                            String language, long page, String sortBy) {
         WebTarget target = basedTarget.path("/account/" + accountId + "/favorite/movies");
 
         if (sessionId != null && !sessionId.isEmpty()) {
@@ -81,7 +81,7 @@ public class TmdbRepository {
         Response response = builder.build().get();
 
         if (response.getStatus() == 200) {
-            return response.readEntity(FavoriteMovieResponse.class);
+            return response.readEntity(MovieTmdbResponse.class);
         } else {
             throw new RuntimeException("Failed to fetch movies: HTTP " + response.getStatus());
         }
@@ -94,8 +94,8 @@ public class TmdbRepository {
             delay = 1000,
             successThreshold = 2
     )
-    public FavoriteTvResponse favoriteTv(long accountId, String sessionId,
-                                         String language, long page, String sortBy) {
+    public TvTmdbResponse favoriteTv(long accountId, String sessionId,
+                                     String language, long page, String sortBy) {
         WebTarget target = basedTarget.path("/account/" + accountId + "/favorite/tv");
 
         if (sessionId != null && !sessionId.isEmpty()) {
@@ -113,7 +113,7 @@ public class TmdbRepository {
         Response response = builder.build().get();
 
         if (response.getStatus() == 200) {
-            return response.readEntity(FavoriteTvResponse.class);
+            return response.readEntity(TvTmdbResponse.class);
         } else {
             throw new RuntimeException("Failed to fetch tv: HTTP " + response.getStatus());
         }

@@ -40,21 +40,21 @@ public class AccountResource {
 
     @GET
     @Path("/{accountId}/favorite/movies")
-    public FavoriteMovieResponse favoriteMovies(@PathParam("accountId") long accountId,
-                                                @QueryParam("sessionId") String sessionId,
-                                                @QueryParam("language") String language,
-                                                @QueryParam("page") long page,
-                                                @QueryParam("sortBy") String sortBy) {
+    public MovieTmdbResponse favoriteMovies(@PathParam("accountId") long accountId,
+                                            @QueryParam("sessionId") String sessionId,
+                                            @QueryParam("language") String language,
+                                            @QueryParam("page") long page,
+                                            @QueryParam("sortBy") String sortBy) {
         return accountService.getFavoriteMovies(accountId, sessionId, language, page, sortBy);
     }
 
     @GET
     @Path("/{accountId}/favorite/tv")
-    public FavoriteTvResponse favoriteTv(@PathParam("accountId") long accountId,
-                                         @QueryParam("sessionId") String sessionId,
-                                         @QueryParam("language") String language,
-                                         @QueryParam("page") long page,
-                                         @QueryParam("sortBy") String sortBy) {
+    public TvTmdbResponse favoriteTv(@PathParam("accountId") long accountId,
+                                     @QueryParam("sessionId") String sessionId,
+                                     @QueryParam("language") String language,
+                                     @QueryParam("page") long page,
+                                     @QueryParam("sortBy") String sortBy) {
         return accountService.getFavoriteTv(accountId, sessionId, language, page, sortBy);
     }
 

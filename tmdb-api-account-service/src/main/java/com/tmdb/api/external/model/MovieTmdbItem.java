@@ -3,20 +3,20 @@ package com.tmdb.api.external.model;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class FavoriteMovieItem extends FavoriteMediaTypeBase {
+public class MovieTmdbItem extends TmdbMediaTypeBase {
 
     private String original_title;
     public String release_date;
     public String title;
     private boolean video;
 
-    public FavoriteMovieItem() {
+    public MovieTmdbItem() {
     }
 
-    public FavoriteMovieItem(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
-                             int id, String original_language, String overview, double popularity,
-                             String poster_path, double vote_average, int vote_count,
-                             String original_title, String release_date, String title, boolean video) {
+    public MovieTmdbItem(boolean adult, String backdrop_path, ArrayList<Integer> genre_ids,
+                         int id, String original_language, String overview, double popularity,
+                         String poster_path, double vote_average, int vote_count,
+                         String original_title, String release_date, String title, boolean video) {
         super(adult, backdrop_path, genre_ids, id, original_language,
                 overview, popularity, poster_path, vote_average, vote_count);
         this.original_title = original_title;
@@ -60,7 +60,7 @@ public class FavoriteMovieItem extends FavoriteMediaTypeBase {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FavoriteMovieItem that)) return false;
+        if (!(o instanceof MovieTmdbItem that)) return false;
         if (!super.equals(o)) return false;
         return video == that.video && Objects.equals(original_title, that.original_title)
                 && Objects.equals(release_date, that.release_date) && Objects.equals(title, that.title);
