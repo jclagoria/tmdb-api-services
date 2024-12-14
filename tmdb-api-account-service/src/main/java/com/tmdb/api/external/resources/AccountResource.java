@@ -66,4 +66,14 @@ public class AccountResource {
         return accountService.getListTmdb(accountId, page, sessionId);
     }
 
+    @GET
+    @Path("/{accountId}/rated/movies")
+    public MovieTmdbResponse getFavoriteMovies(@PathParam("accountId") long accountId,
+                                               @QueryParam("sessionId") String sessionId,
+                                               @QueryParam("leanguage") String language,
+                                               @QueryParam("page") long page,
+                                               @QueryParam("sortBy") String sortBy) {
+        return accountService.getRatedMovies(accountId, sessionId, language, page, sortBy);
+    }
+
 }

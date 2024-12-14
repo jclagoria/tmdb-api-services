@@ -50,4 +50,9 @@ public class AccountService {
         return  tmdbRepository.getListTmdb(accountId, page, sessionId);
     }
 
+    public MovieTmdbResponse getRatedMovies(long accountId, String sessionId,
+                                            String language, long page, String sortBy) {
+        return tmdbRepository.getRatedMovies(accountId, language, page, sessionId, sortBy);
+    }
+
 }
