@@ -3,9 +3,9 @@ package com.tmdb.api.external.repository;
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.*;
-import com.tmdb.api.external.util.ApiRequestBuilder;
 import com.tmdb.api.external.util.ApiRequestBuilderFactory;
 import com.tmdb.api.util.Loggable;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
@@ -14,8 +14,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
-import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ApplicationScoped
 public class TmdbRepository {
@@ -29,6 +31,42 @@ public class TmdbRepository {
     @ConfigProperty(name = "tmdb.api.token")
     String API_TOKEN;
 
+    @PostConstruct
+    public void validateConfiguration() {
+        if (API_TOKEN == null || API_TOKEN.isEmpty()) {
+            throw new IllegalStateException("API_TOKEN must be configured");
+        }
+
+        if (basedTarget == null) {
+            throw new IllegalStateException("Base WebTarget must be initialized");
+        }
+    }
+
+    private WebTarget prepareTarget(String path, Map<String, Object> queryParams) {
+        WebTarget target = basedTarget.path(path);
+
+        for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+            if ( entry.getKey() != null && entry.getValue() != null ) {
+                target = target.queryParam(entry.getKey(), entry.getValue());
+            }
+        }
+        return target;
+    }
+
+    private <T> T executeGetRequest(WebTarget target, Class<T> responseType) {
+        try (Response response = apiRequestBuilderFactory.newBuilder(target)
+                .addHeader("accept", MediaType.APPLICATION_JSON)
+                .addHeader("Authorization", "Bearer " + API_TOKEN)
+                .build().get()) {
+            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                return response.readEntity(responseType);
+            } else {
+                String error = response.readEntity(String.class);
+                throw new IllegalCallerException("FAiled to fetch data: Http " + response.getStatus() + " " + error);
+            }
+        }
+    }
+
     @Loggable
     @Retry(maxRetries = 3, delay = 500)
     @CircuitBreaker(
@@ -37,22 +75,15 @@ public class TmdbRepository {
             delay = 1000,
             successThreshold = 2
     )
-    @Fallback(fallbackMethod = "getAccountDetailsFallback")
-    public DetailUser getAccountDetails(int accountId) {
+    public DetailUser getAccountDetails(long accountId, String sessionId) {
+        Map<String, Object> queryParams = new HashMap<>();
 
-        WebTarget target = basedTarget.path("/account/" + accountId);
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(DetailUser.class);
-        } else {
-            throw new RuntimeException("Failed to fetch account details: HTTP "+response.getStatus());
+        if (sessionId != null) {
+            queryParams.put("session_id", sessionId);
         }
 
+        WebTarget target = prepareTarget("/account/" + accountId, queryParams);
+        return executeGetRequest(target, DetailUser.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -64,27 +95,17 @@ public class TmdbRepository {
     )
     public MovieTmdbResponse favoriteMovies(long accountId, String sessionId,
                                             String language, long page, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/favorite/movies");
+        Map<String, Object> queryParams = new HashMap<>();
 
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(MovieTmdbResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch movies: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/favorite/movies", queryParams);
+        return executeGetRequest(target, MovieTmdbResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -96,28 +117,17 @@ public class TmdbRepository {
     )
     public TvTmdbResponse favoriteTv(long accountId, String sessionId,
                                      String language, long page, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/favorite/tv");
 
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(TvTmdbResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch tv: HTTP " + response.getStatus());
-        }
-
+        WebTarget target = prepareTarget("/account/" + accountId + "/favorite/tv", queryParams);
+        return executeGetRequest(target, TvTmdbResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -128,25 +138,16 @@ public class TmdbRepository {
             successThreshold = 2
     )
     public TmdbListResponse getListTmdb(long accountId, long page, String sessionId) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/lists");
 
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("page", page > 0 ? page : 1);
 
-        target = target.queryParam("page", page > 0  ? page : 1 );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(TmdbListResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch tmdb: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/lists", queryParams);
+        return executeGetRequest(target, TmdbListResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -158,27 +159,16 @@ public class TmdbRepository {
     )
     public MovieTmdbResponse getRatedMovies(long accountId, String language,
                                             long page, String sessionId, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/rated/movies");
-
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(MovieTmdbResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch rated movies: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/rated/movies", queryParams);
+        return executeGetRequest(target, MovieTmdbResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -189,27 +179,16 @@ public class TmdbRepository {
             successThreshold = 2
     )
     public TvTmdbResponse getRatedTv(long accountId, String language,long page, String sessionId, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/rated/tv");
-
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(TvTmdbResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch rated tv: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/rated/tv", queryParams);
+        return executeGetRequest(target, TvTmdbResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -221,27 +200,16 @@ public class TmdbRepository {
     )
     public TvEpisodeResponse getRatedTvEpisode(long accountId, String language,
                                                long page, String sessionId, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/rated/tv/episodes");
-
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(TvEpisodeResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch rated tv: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/rated/tv/episodes", queryParams);
+        return executeGetRequest(target, TvEpisodeResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -253,27 +221,16 @@ public class TmdbRepository {
     )
     public MovieTmdbResponse getWatchlistMovies(long accountId, String language,
                                                 long page, String sessionId, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/watchlist/movies");
-
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(MovieTmdbResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch watchlist movies: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/watchlist/movies", queryParams);
+        return executeGetRequest(target, MovieTmdbResponse.class);
     }
 
     @Retry(maxRetries = 3, delay = 500)
@@ -285,27 +242,16 @@ public class TmdbRepository {
     )
     public TvTmdbResponse getWatchlistTv(long accountId, String language,
                                          long page, String sessionId, String sortBy) {
-        WebTarget target = basedTarget.path("/account/" + accountId + "/watchlist/tv");
-
-        if (sessionId != null && !sessionId.isEmpty()) {
-            target = target.queryParam("sessionId", sessionId);
+        Map<String, Object> queryParams = new HashMap<>();
+        if(sessionId != null){
+            queryParams.put("session_id", sessionId);
         }
+        queryParams.put("language", language != null  ? language : "en-US");
+        queryParams.put("page", page > 0 ? page : 1);
+        queryParams.put("sort_by", sortBy != null ? sortBy : "created_at.asc");
 
-        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
-        target = target.queryParam("page", page > 0 ? page : 1 );
-        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
-
-        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
-                .addHeader("accept", MediaType.APPLICATION_JSON)
-                .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-        Response response = builder.build().get();
-
-        if (response.getStatus() == 200) {
-            return response.readEntity(TvTmdbResponse.class);
-        } else {
-            throw new RuntimeException("Failed to fetch watchlist series: HTTP " + response.getStatus());
-        }
+        WebTarget target = prepareTarget("/account/" + accountId + "/watchlist/tv", queryParams);
+        return executeGetRequest(target, TvTmdbResponse.class);
     }
 
     @Loggable
@@ -316,28 +262,27 @@ public class TmdbRepository {
             delay = 1000,
             successThreshold = 2
     )
-    @Fallback(fallbackMethod = "getAddFavoritesFallback")
     public TmdbApiResponse addFavorite(int accountId, String sessionId, AddFavoriteRequest request) {
         try {
-            String url = "/account/" + accountId + "/favorite";
-            WebTarget target = basedTarget.path(url);
-
-            if (sessionId != null && !sessionId.isEmpty()) {
-                target = target.queryParam("session_id", sessionId); // Ensure this matches TMDB's API spec
+            Map<String, Object> queryParams = new HashMap<>();
+            if(sessionId != null){
+                queryParams.put("session_id", sessionId);
             }
 
-            ApiRequestBuilder builder = new ApiRequestBuilder(target)
+            WebTarget target = prepareTarget("/account/" + accountId + "/favorite", queryParams);
+
+            try (Response response = apiRequestBuilderFactory.newBuilder(target)
                     .addHeader("accept", MediaType.APPLICATION_JSON)
                     .addHeader("content-type", MediaType.APPLICATION_JSON)
-                    .addHeader("Authorization", "Bearer " + API_TOKEN); // API_TOKEN should come from a secure config
-
-            try (Response response = builder.build().post(Entity.entity(request, MediaType.APPLICATION_JSON))) {
-
-                if (response.getStatus() == 201 || response.getStatus() == 200) {
+                    .addHeader("Authorization", "Bearer " + API_TOKEN)
+                    .build()
+                    .post(Entity.entity(request, MediaType.APPLICATION_JSON))) {
+                if (response.getStatus() == 200 || response.getStatus() == 201) {
                     return response.readEntity(TmdbApiResponse.class);
                 } else {
-                    String errorResponse = response.readEntity(String.class); // Read error response for debugging
+                    String errorResponse = response.readEntity(String.class);
                     throw new RuntimeException("Failed to add favorite: HTTP " + response.getStatus() + ". Response: " + errorResponse);
+                    //throw new ApiException("Failed to add favorite", response.getStatus());
                 }
             }
         } catch (Exception e) {
@@ -354,19 +299,18 @@ public class TmdbRepository {
     )
     public TmdbApiResponse addToWatchList(int accountId, String sessionId, AddToWatchListRequest request) {
         try {
-            String url = "/account/" + accountId + "/watchlist";
-            WebTarget target = basedTarget.path(url);
-
-            if (sessionId != null && !sessionId.isEmpty()) {
-                target = target.queryParam("session_id", sessionId);
+            Map<String, Object> queryParams = new HashMap<>();
+            if(sessionId != null){
+                queryParams.put("session_id", sessionId);
             }
 
-            ApiRequestBuilder builder = new ApiRequestBuilder(target)
+            WebTarget target = prepareTarget("/account/" + accountId + "/watchlist", queryParams);
+
+            try (Response response = apiRequestBuilderFactory.newBuilder(target)
                     .addHeader("accept", MediaType.APPLICATION_JSON)
                     .addHeader("content-type", MediaType.APPLICATION_JSON)
-                    .addHeader("Authorization", "Bearer " + API_TOKEN);
-
-            try (Response response = builder.build().post(Entity.entity(request, MediaType.APPLICATION_JSON))) {
+                    .addHeader("Authorization", "Bearer " + API_TOKEN)
+                    .build().post(Entity.entity(request, MediaType.APPLICATION_JSON))) {
                 if (response.getStatus() == 201 || response.getStatus() == 200) {
                     return response.readEntity(TmdbApiResponse.class);
                 } else {
@@ -378,14 +322,6 @@ public class TmdbRepository {
         } catch (Exception ex) {
             throw new RuntimeException("Error adding watch list: " + ex.getMessage(), ex);
         }
-    }
-
-    public DetailUser getAccountDetailsFallback(int accountId) {
-        return new DetailUser(); // Return a safe default object
-    }
-
-    public TmdbApiResponse getAddFavoritesFallback(int accountId, String sessionId, AddFavoriteRequest request) {
-        return new TmdbApiResponse(); // Return a safe default object
     }
 
 }

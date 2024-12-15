@@ -15,9 +15,9 @@ public class AccountService {
     TmdbRepository tmdbRepository;
 
     @Loggable
-    public DetailUser getAccount(int accountId) {
+    public DetailUser getAccount(long accountId, String sessionId) {
         try {
-            return tmdbRepository.getAccountDetails(accountId);
+            return tmdbRepository.getAccountDetails(accountId, sessionId);
         } catch (RuntimeException ex) {
             System.out.println("Error fetching account details");
             return null;

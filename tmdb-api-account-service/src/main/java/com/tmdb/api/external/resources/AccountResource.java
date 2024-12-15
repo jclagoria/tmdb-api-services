@@ -18,8 +18,9 @@ public class AccountResource {
 
     @GET
     @Path("/{accountId}")
-    public DetailUser getAccountService(@PathParam("accountId") int accountId) {
-        return accountService.getAccount(accountId);
+    public DetailUser getAccountService(@PathParam("accountId") long accountId,
+                                        @QueryParam("sessionId") String sessionId) {
+        return accountService.getAccount(accountId, sessionId);
     }
 
     @POST
