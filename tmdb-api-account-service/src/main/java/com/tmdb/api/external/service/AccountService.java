@@ -59,4 +59,9 @@ public class AccountService {
         return tmdbRepository.getRatedTv(accountId, language, page, sessionId, sortBy);
     }
 
+    public TvEpisodeResponse getRatedEpisodeTv(long accountId, String sessionId,
+                                               String language, long page, String sortBy) {
+        return tmdbRepository.getRatedTvEpisode(accountId, language, page, sessionId, sortBy);
+    }
+
 }

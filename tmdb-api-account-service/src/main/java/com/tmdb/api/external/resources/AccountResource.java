@@ -86,4 +86,14 @@ public class AccountResource {
         return accountService.getRatedTv(accountId, sessionId, language, page, sortBy);
     }
 
+    @GET
+    @Path("/{accountId}/rated/tv/episode")
+    public TvEpisodeResponse getRatedEpisodeTv(@PathParam("accountId") long accountId,
+                                               @QueryParam("sessionId") String sessionId,
+                                               @QueryParam("languege") String language,
+                                               @QueryParam("page") long page,
+                                               @QueryParam("sortBy") String sortBy) {
+        return accountService.getRatedEpisodeTv(accountId, sessionId, language, page, sortBy);
+    }
+
 }
