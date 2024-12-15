@@ -64,4 +64,9 @@ public class AccountService {
         return tmdbRepository.getRatedTvEpisode(accountId, language, page, sessionId, sortBy);
     }
 
+    public MovieTmdbResponse getWatchlistMovies(long accountId, String sessionId,
+                                                String language, long page, String sortBy) {
+        return tmdbRepository.getWatchlistMovies(accountId, language, page, sessionId, sortBy);
+    }
+
 }

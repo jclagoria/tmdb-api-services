@@ -96,4 +96,14 @@ public class AccountResource {
         return accountService.getRatedEpisodeTv(accountId, sessionId, language, page, sortBy);
     }
 
+    @GET
+    @Path("/{accountId}/watchlist/movies")
+    public MovieTmdbResponse getWatchlistMovies(@PathParam("accountId") long accountId,
+                                                @QueryParam("sessionId") String sessionId,
+                                                @QueryParam("language") String language,
+                                                @QueryParam("page") long page,
+                                                @QueryParam("sortBy") String sortBy) {
+        return accountService.getWatchlistMovies(accountId, sessionId, language, page, sortBy);
+    }
+
 }

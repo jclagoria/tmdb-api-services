@@ -244,6 +244,38 @@ public class TmdbRepository {
         }
     }
 
+    @Retry(maxRetries = 3, delay = 500)
+    @CircuitBreaker(
+            requestVolumeThreshold = 5,
+            failureRatio = 0.5,
+            delay = 1000,
+            successThreshold = 2
+    )
+    public MovieTmdbResponse getWatchlistMovies(long accountId, String language,
+                                                long page, String sessionId, String sortBy) {
+        WebTarget target = basedTarget.path("/account/" + accountId + "/watchlist/movies");
+
+        if (sessionId != null && !sessionId.isEmpty()) {
+            target = target.queryParam("sessionId", sessionId);
+        }
+
+        target = target.queryParam("language", (language != null && !language.isEmpty()) ? language : "en-US" );
+        target = target.queryParam("page", page > 0 ? page : 1 );
+        target = target.queryParam("sortBy", (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at.asc" );
+
+        ApiRequestBuilder builder = apiRequestBuilderFactory.newBuilder(target)
+                .addHeader("accept", MediaType.APPLICATION_JSON)
+                .addHeader("Authorization", "Bearer " + API_TOKEN);
+
+        Response response = builder.build().get();
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(MovieTmdbResponse.class);
+        } else {
+            throw new RuntimeException("Failed to fetch watchlist movies: HTTP " + response.getStatus());
+        }
+    }
+
     @Loggable
     @Retry(maxRetries = 3, delay = 500)
     @CircuitBreaker(
