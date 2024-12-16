@@ -46,7 +46,7 @@ public class AccountResource {
                                             @QueryParam("language") String language,
                                             @QueryParam("page") long page,
                                             @QueryParam("sortBy") String sortBy) {
-        return accountService.getFavoriteMovies(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchMovies("favorites", accountId, sessionId, language, page, sortBy);
     }
 
     @GET
@@ -56,7 +56,7 @@ public class AccountResource {
                                      @QueryParam("language") String language,
                                      @QueryParam("page") long page,
                                      @QueryParam("sortBy") String sortBy) {
-        return accountService.getFavoriteTv(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchTvShows("favorites", accountId, sessionId, language, page, sortBy);
     }
 
     @GET
@@ -74,7 +74,7 @@ public class AccountResource {
                                                @QueryParam("leanguage") String language,
                                                @QueryParam("page") long page,
                                                @QueryParam("sortBy") String sortBy) {
-        return accountService.getRatedMovies(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchMovies("rated", accountId, sessionId, language, page, sortBy);
     }
 
     @GET
@@ -84,7 +84,7 @@ public class AccountResource {
                                      @QueryParam("language") String language,
                                      @QueryParam("page") long page,
                                      @QueryParam("sortBy") String sortBy) {
-        return accountService.getRatedTv(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchTvShows("rated", accountId, sessionId, language, page, sortBy);
     }
 
     @GET
@@ -94,7 +94,7 @@ public class AccountResource {
                                                @QueryParam("languege") String language,
                                                @QueryParam("page") long page,
                                                @QueryParam("sortBy") String sortBy) {
-        return accountService.getRatedEpisodeTv(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchRatedTvEpisodes(accountId, sessionId, language, page, sortBy);
     }
 
     @GET
@@ -104,7 +104,7 @@ public class AccountResource {
                                                 @QueryParam("language") String language,
                                                 @QueryParam("page") long page,
                                                 @QueryParam("sortBy") String sortBy) {
-        return accountService.getWatchlistMovies(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchMovies("watchlist", accountId, sessionId, language, page, sortBy);
     }
 
     @GET
@@ -114,7 +114,7 @@ public class AccountResource {
                                                @QueryParam("language") String language,
                                                @QueryParam("page") long page,
                                                @QueryParam("sortBy") String sortBy) {
-        return accountService.getWatchlistTv(accountId, sessionId, language, page, sortBy);
+        return accountService.fetchTvShows("watchlist", accountId, sessionId, language, page, sortBy);
     }
 
 }
