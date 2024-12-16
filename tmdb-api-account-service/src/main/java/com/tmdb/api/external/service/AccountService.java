@@ -3,8 +3,7 @@ package com.tmdb.api.external.service;
 import com.tmdb.api.external.dto.AddFavoriteRequest;
 import com.tmdb.api.external.dto.AddToWatchListRequest;
 import com.tmdb.api.external.model.*;
-import com.tmdb.api.external.repository.TmdbRepository;
-import com.tmdb.api.util.Loggable;
+import com.tmdb.api.external.repository.TmdbRepositoryImpl;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -12,9 +11,8 @@ import jakarta.inject.Inject;
 public class AccountService {
 
     @Inject
-    TmdbRepository tmdbRepository;
+    TmdbRepositoryImpl tmdbRepository;
 
-    @Loggable
     public DetailUser getAccount(long accountId, String sessionId) {
         try {
             return tmdbRepository.getAccountDetails(accountId, sessionId);
